@@ -645,8 +645,8 @@
   <script>
     // 1. Function to send iframe height to parent
     function sendIframeHeight() {
-        // You'll need a main container div for your products content
-        const contentContainer = document.getElementById('BMR-CalculatorContainerContainer'); (Update this name - same as above in step 1.)
+        // You'll need a main container div for your calculator content
+        const contentContainer = document.getElementById('BMR-CalculatorContainer');
         if (contentContainer) {
             // Calculate scroll height and add a small buffer
             const height = contentContainer.scrollHeight + 20;
@@ -667,7 +667,7 @@
     });
 
     // Use a ResizeObserver to automatically send a new height whenever the content size changes
-    const containerToObserve = document.getElementById('productsContainer'); (Update this)
+    const containerToObserve = document.getElementById('BMR-CalculatorContainer'); (Update this)
     if (containerToObserve) {
         const resizeObserver = new ResizeObserver(entries => {
             console.log('GitHub Page: ResizeObserver detected change, requesting new height.');
