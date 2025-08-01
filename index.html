@@ -160,7 +160,7 @@
 </style>
 </head>
 <body>
-  <div id="BMR-CalculatorContainer">
+  <div class="calculator-container">
     <h2>BMR & Goal Weight Calculator</h2>
     <form id="bmrForm">
       <label>Gender</label>
@@ -639,47 +639,6 @@
     document.getElementById('goalResult').innerHTML = resultHtml;
     document.getElementById('goalResult').style.display = 'block';
   }
-</script>
-
-  <script>
-    // 1. Function to send iframe height to parent
-    function sendIframeHeight() {
-        // You'll need a main container div for your calculator content
-        const contentContainer = document.getElementById('BMR-CalculatorContainer');
-        if (contentContainer) {
-            // Calculate scroll height and add a small buffer
-            const height = contentContainer.scrollHeight + 20;
-            
-            // Log the height for debugging
-            console.log('GitHub Page: Sending iframe height:', height);
-            
-            // IMPORTANT: The targetOrigin MUST be your Pixpa domain
-            window.parent.postMessage({ type: 'setIframeHeight', height: height }, 'https://www.menohello.com'); (don’t change this)
-        }
-    }
-    
-    // 2. Set up the observer and initial call
-    
-    // Call on initial page load
-    window.addEventListener('DOMContentLoaded', () => {
-      sendIframeHeight();
-    });
-
-    // Use a ResizeObserver to automatically send a new height whenever the content size changes
-    const containerToObserve = document.getElementById('BMR-CalculatorContainer'); (Update this)
-    if (containerToObserve) {
-        const resizeObserver = new ResizeObserver(entries => {
-            console.log('GitHub Page: ResizeObserver detected change, requesting new height.');
-            sendIframeHeight();
-        });
-        resizeObserver.observe(containerToObserve);
-    }
-    
-    // Fallback for slower-loading content like images
-    window.addEventListener('load', () => {
-      console.log('GitHub Page: window loaded, sending initial height.');
-      sendIframeHeight();
-    });
 </script>
 </body>
 </html>
