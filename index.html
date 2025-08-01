@@ -160,7 +160,6 @@
 </style>
 </head>
 <body>
-  <div id="BMR-CalculatorContainer">
   <div class="calculator-container">
     <h2>BMR & Goal Weight Calculator</h2>
     <form id="bmrForm">
@@ -234,7 +233,7 @@
       </div>
     </div>
   </div>
-</div>
+
 <script>
   // Enhanced input styling
   document.querySelectorAll('input').forEach(el => {
@@ -640,36 +639,6 @@
     document.getElementById('goalResult').innerHTML = resultHtml;
     document.getElementById('goalResult').style.display = 'block';
   }
-</script>
-  <script>
-  // 1. Function to send iframe height to parent
-  function sendIframeHeight() {
-    const contentContainer = document.getElementById('BMRCalculatorContainer'); // ✅ Updated ID
-    if (contentContainer) {
-      const height = contentContainer.scrollHeight + 20;
-      console.log('GitHub Page: Sending iframe height:', height);
-      window.parent.postMessage({ type: 'setIframeHeight', height: height }, 'https://www.menohello.com');
-    }
-  }
-
-  // 2. Set up the observer and initial call
-  window.addEventListener('DOMContentLoaded', () => {
-    sendIframeHeight();
-  });
-
-  const containerToObserve = document.getElementById('BMRCalculatorContainer'); // ✅ Updated ID
-  if (containerToObserve) {
-    const resizeObserver = new ResizeObserver(() => {
-      console.log('GitHub Page: ResizeObserver detected change, requesting new height.');
-      sendIframeHeight();
-    });
-    resizeObserver.observe(containerToObserve);
-  }
-
-  window.addEventListener('load', () => {
-    console.log('GitHub Page: window loaded, sending initial height.');
-    sendIframeHeight();
-  });
 </script>
 </body>
 </html>
