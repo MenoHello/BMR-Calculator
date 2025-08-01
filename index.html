@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>MenoHello BMR & Goal Weight Calculator</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Poppins&display=swap');
+  body {
+    background-color: #ffe9e5;
+    font-family: 'Poppins', sans-serif;
+    color: #333;
+    margin: 2rem;
+  }
+  .calculator-container {
+    max-width: 480px;
+    background: white;
+    padding: 2rem;
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    margin: auto;
+  }
+  h2 {
+    color: #ffa798;
+    margin-bottom: 1.5rem;
+    text-align: center;
+  }
+  label {
+    display: block;
+    margin: 1rem 0 0.5rem;
+    font-weight: 600;
+  }
+  input[type="number"], input[type="date"] {
+    width: 100%;
+    padding: 0.5rem;
+    font-size: 1rem;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    opacity: 0.4;
+    transition: opacity 0.3s ease;
+    box-sizing: border-box;
+    -moz-appearance: textfield;
+  }
+  
+  /* Remove spinner arrows from number inputs */
+  input[type="number"]::-webkit-outer-spin-button,
+  input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  input[type="number"]:focus, input[type="date"]:focus, input.used {
+    opacity: 1;
+    border-color: #ffa798;
+    outline: none;
+  }
+  .height-inputs {
+    display: flex;
+    gap: 1rem;
+  }
+  .height-inputs input {
+    flex: 1;
+  }
+  .activity-options label {
+    display: block;
+    margin: 0.5rem 0;
+    padding: 0.5rem;
+    border-radius: 8px;
+    border: 2px solid #ddd;
+    cursor: pointer;
+    transition: border-color 0.3s ease;
+  }
+  .activity-options label:hover {
+    border-color: #ffa798;
+  }
+  .activity-options input[type="radio"] {
+    margin-right: 0.5rem;
+  }
+  .activity-options input[type="radio"]:checked + span {
+    font-weight: 600;
+  }
+  .gender-options {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+  .gender-options label {
+    flex: 1;
+    text-align: center;
+    padding: 0.7rem;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  .gender-options input[type="radio"]:checked + span {
+    background-color: #ffa798;
+    color: white;
+    border-radius: 6px;
+    padding: 0.2rem 0.5rem;
+  }
+  button {
+    margin-top: 1.8rem;
+    background-color: #ffa798;
+    color: white;
+    font-weight: 700;
+    padding: 0.7rem;
+    width: 100%;
+    border: none;
+    border-radius: 12px;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  button:hover {
+    background-color: #ffd2cb;
+    color: #333;
+  }
+  .result {
+    margin-top: 2rem;
+    padding: 1.4rem;
+    background-color: #ffe9e5;
+    border-radius: 12px;
+    border: 1.5px solid #ffa798;
+    font-size: 1.1rem;
+    line-height: 1.6;
+  }
+  .result h3 {
+    color: #ffa798;
+    margin-top: 0;
+    margin-bottom: 1rem;
+  }
+  .result-item {
+    margin: 0.8rem 0;
+    padding: 0.5rem;
+    background: white;
+    border-radius: 8px;
+    border-left: 4px solid #ffa798;
+  }
+  .result-item strong {
+    color: #ffa798;
+  }
+  .warning {
+    background-color: #fff3cd;
+    border-color: #ffc107;
+    border-left-color: #ffc107;
+    color: #856404;
+    margin-top: 1rem;
+    padding: 0.8rem;
+    border-radius: 8px;
+    font-size: 0.95rem;
+  }
+  .error {
+    background-color: #f8d7da;
+    border-color: #dc3545;
+    color: #721c24;
+    padding: 0.8rem;
+    border-radius: 8px;
+    margin-top: 1rem;
+  }
+</style>
+</head>
+<body>
+  <div class="calculator-container">
+    <h2>BMR & Goal Weight Calculator</h2>
+    <form id="bmrForm">
+      <label>Gender</label>
+      <div class="gender-options">
+        <label><input type="radio" name="gender" value="female" required /><span>Female</span></label>
+        <label><input type="radio" name="gender" value="male" /><span>Male</span></label>
+      </div>
+
+      <label for="age">Age (years)</label>
+      <input type="number" id="age" name="age" placeholder="e.g., 52" min="15" max="100" required />
+
+      <label>Height</label>
+      <div class="height-inputs">
+        <input type="number" id="heightFeet" placeholder="Feet" min="3" max="8" required />
+        <input type="number" id="heightInches" placeholder="Inches" min="0" max="11" step="0.5" required />
+      </div>
+
+      <label for="weight">Current Weight (lbs)</label>
+      <input type="number" id="weight" placeholder="e.g., 160" min="70" max="500" step="0.1" required />
+
+      <label for="goalWeight">Goal Weight (lbs)</label>
+      <input type="number" id="goalWeight" placeholder="e.g., 145" min="70" max="500" step="0.1" required />
+
+      <label>Activity Level</label>
+      <div class="activity-options">
+        <label><input type="radio" name="activity" value="1.2" required /><span>Sedentary – I mostly sit or rest during the day</span></label>
+        <label><input type="radio" name="activity" value="1.375" /><span>Lightly Active – I take walks or do light movement 1–2x/week</span></label>
+        <label><input type="radio" name="activity" value="1.55" /><span>Moderately Active – I move or exercise about 3–4x/week</span></label>
+        <label><input type="radio" name="activity" value="1.725" /><span>Very Active – I work out or move most days</span></label>
+        <label><input type="radio" name="activity" value="1.9" /><span>Super Active – I train hard or do intense movement daily</span></label>
+      </div>
+
+      <label>Timeframe for Goal (optional)</label>
+      <div class="activity-options">
+        <label><input type="radio" name="timeframe" value="0" checked /><span>I'm in no rush—just want to see how it adds up</span></label>
+        <label><input type="radio" name="timeframe" value="12" /><span>In 3 months</span></label>
+        <label><input type="radio" name="timeframe" value="24" /><span>In 6 months</span></label>
+        <label><input type="radio" name="timeframe" value="custom" /><span>By a specific date:</span></label>
+        <input type="date" id="customDate" disabled />
+      </div>
+
+      <button type="submit">Calculate</button>
+    </form>
+
+    <div id="result" class="result" style="display:none;"></div>
+    
+    <!-- Interactive Goal Calculator -->
+    <div id="goalCalculator" class="calculator-container" style="display:none; margin-top: 2rem;">
+      <h2>Weight Goal Calculator</h2>
+      <p style="color: #666; line-height: 1.5; margin-bottom: 1.5rem;">
+        Want to see how changes to your diet and exercise could affect your weight goal? 
+        Adjust the numbers below and click 'Calculate' to see an updated projected date.
+      </p>
+      
+      <div style="margin-bottom: 1rem;">
+        <label for="dailyCalories" style="color: #666; font-weight: 600;">Daily Calorie Intake:</label>
+        <input type="number" id="dailyCalories" placeholder="1350" step="10" style="margin-top: 0.5rem;" />
+      </div>
+      
+      <div style="margin-bottom: 1.5rem;">
+        <label for="exerciseCalories" style="color: #666; font-weight: 600;">Calories Burned from Exercise:</label>
+        <input type="number" id="exerciseCalories" placeholder="225" step="5" style="margin-top: 0.5rem;" />
+      </div>
+      
+      <button type="button" id="calculateGoalDate" style="background-color: #ffa798; margin-top: 0;">Calculate New Goal Date</button>
+      
+      <div id="goalResult" style="display:none; margin-top: 1.5rem; padding: 1rem; background-color: #ffe9e5; border-radius: 8px; border-left: 4px solid #ffa798;">
+        <div id="goalDateDisplay" style="font-size: 1.1rem; font-weight: 600; color: #ffa798; margin-bottom: 0.5rem;"></div>
+        <div id="goalDetailsDisplay" style="font-size: 0.95rem; color: #666; line-height: 1.4;"></div>
+      </div>
+    </div>
+  </div>
+
+<script>
+  // Enhanced input styling
+  document.querySelectorAll('input').forEach(el => {
+    el.addEventListener('input', () => el.classList.add('used'));
+    el.addEventListener('change', () => el.classList.add('used'));
+  });
+
+  // Custom date handling
+  document.querySelectorAll('input[name="timeframe"]').forEach(radio => {
+    radio.addEventListener('change', function () {
+      const dateInput = document.getElementById('customDate');
+      dateInput.disabled = this.value !== 'custom';
+      if (this.value !== 'custom') {
+        dateInput.value = '';
+      }
+    });
+  });
+
+  // Goal calculator button handler
+  document.getElementById('calculateGoalDate').addEventListener('click', function() {
+    calculateNewGoalDate();
+  });
+
+  // Store original calculation data for goal calculator
+  let originalCalculationData = null;
+
+  // Form submission and calculations
+  document.getElementById('bmrForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    try {
+      calculateResults();
+    } catch (error) {
+      showError('An error occurred during calculation. Please check your inputs and try again.');
+    }
+  });
+
+  function calculateResults() {
+    // Get form data
+    const data = {
+      gender: document.querySelector('input[name="gender"]:checked')?.value,
+      age: parseInt(document.getElementById('age').value),
+      heightFeet: parseInt(document.getElementById('heightFeet').value),
+      heightInches: parseFloat(document.getElementById('heightInches').value),
+      weight: parseFloat(document.getElementById('weight').value),
+      goalWeight: parseFloat(document.getElementById('goalWeight').value),
+      activity: parseFloat(document.querySelector('input[name="activity"]:checked')?.value),
+      timeframe: document.querySelector('input[name="timeframe"]:checked')?.value,
+      customDate: document.getElementById('customDate').value
+    };
+
+    console.log('Form data:', data); // Debug log
+
+    // Validation
+    if (!validateInputs(data)) return;
+
+    // Convert height to cm and weight to kg for calculations
+    const totalInches = (data.heightFeet * 12) + data.heightInches;
+    const heightCm = totalInches * 2.54;
+    const weightKg = data.weight * 0.453592;
+    const goalWeightKg = data.goalWeight * 0.453592;
+
+    console.log('Converted values:', { heightCm, weightKg, goalWeightKg }); // Debug log
+
+    // Calculate BMR using Mifflin-St Jeor Equation
+    let bmr;
+    if (data.gender === 'male') {
+      bmr = (10 * weightKg) + (6.25 * heightCm) - (5 * data.age) + 5;
+    } else {
+      bmr = (10 * weightKg) + (6.25 * heightCm) - (5 * data.age) - 161;
+    }
+
+    // Calculate TDEE (Total Daily Energy Expenditure)
+    const tdee = bmr * data.activity;
+
+    console.log('BMR and TDEE:', { bmr, tdee }); // Debug log
+
+    // Calculate weight difference
+    const weightDifference = data.weight - data.goalWeight;
+    const isWeightLoss = weightDifference > 0;
+
+    // Calculate calories needed for goal
+    const caloriesPerPound = 3500; // Standard approximation
+    const totalCaloriesNeeded = Math.abs(weightDifference) * caloriesPerPound;
+
+    console.log('Weight info:', { weightDifference, isWeightLoss, totalCaloriesNeeded }); // Debug log
+
+    // Calculate timeline
+    let timelineResults = calculateTimeframe(data, totalCaloriesNeeded, tdee, isWeightLoss, bmr);
+
+    console.log('Timeline results:', timelineResults); // Debug log
+
+    if (!timelineResults) return; // Exit if timeframe calculation failed
+
+    // Display results
+    displayResults(bmr, tdee, data, weightDifference, timelineResults, isWeightLoss);
+  }
+
+  function validateInputs(data) {
+    const errors = [];
+
+    if (!data.gender) errors.push('Please select your gender');
+    if (!data.age || data.age < 15 || data.age > 100) errors.push('Please enter a valid age (15-100)');
+    if (!data.heightFeet || data.heightFeet < 3 || data.heightFeet > 8) errors.push('Please enter valid height in feet (3-8)');
+    if (isNaN(data.heightInches) || data.heightInches < 0 || data.heightInches > 11) errors.push('Please enter valid inches (0-11)');
+    if (!data.weight || isNaN(data.weight) || data.weight < 50 || data.weight > 600) errors.push('Please enter a valid current weight');
+    if (!data.goalWeight || isNaN(data.goalWeight) || data.goalWeight < 50 || data.goalWeight > 600) errors.push('Please enter a valid goal weight');
+    if (!data.activity) errors.push('Please select your activity level');
+
+    if (data.timeframe === 'custom' && !data.customDate) {
+      errors.push('Please select a target date or choose a different timeframe option');
+    }
+
+    if (errors.length > 0) {
+      showError(errors.join('<br>'));
+      return false;
+    }
+
+    return true;
+  }
+
+  function calculateTimeframe(data, totalCaloriesNeeded, tdee, isWeightLoss, bmr) {
+    let weeks = 0;
+    let dailyCalorieAdjustment = 0;
+    let targetDailyCalories = tdee;
+
+    console.log('Timeframe input:', { timeframe: data.timeframe, totalCaloriesNeeded, tdee, isWeightLoss, bmr }); // Debug log
+
+    if (data.timeframe === '0') {
+      // No specific timeframe - calculate safest sustainable rate
+      if (isWeightLoss) {
+        // Safe deficit: start with 400 calories, but don't go below BMR
+        const maxSafeDeficit = Math.min(500, tdee - bmr);
+        dailyCalorieAdjustment = Math.max(300, maxSafeDeficit);
+        targetDailyCalories = tdee - dailyCalorieAdjustment;
+        
+        // If still below BMR, use BMR as minimum
+        if (targetDailyCalories < bmr) {
+          targetDailyCalories = bmr;
+          dailyCalorieAdjustment = tdee - bmr;
+        }
+        
+        // Ensure we have some deficit
+        if (dailyCalorieAdjustment <= 0) {
+          dailyCalorieAdjustment = 100; // Minimal deficit
+          targetDailyCalories = tdee - 100;
+        }
+      } else {
+        // For weight gain, use moderate surplus
+        dailyCalorieAdjustment = 300;
+        targetDailyCalories = tdee + dailyCalorieAdjustment;
+      }
+      
+      // Calculate weeks based on daily calorie adjustment
+      const weeklyWeightChange = (dailyCalorieAdjustment * 7) / 3500;
+      weeks = Math.abs(data.weight - data.goalWeight) / weeklyWeightChange;
+      
+      console.log('No rush calculation:', { dailyCalorieAdjustment, weeklyWeightChange, weeks }); // Debug log
+      
+    } else if (data.timeframe === 'custom') {
+      const targetDate = new Date(data.customDate);
+      const today = new Date();
+      const timeDiff = targetDate.getTime() - today.getTime();
+      weeks = timeDiff / (1000 * 3600 * 24 * 7);
+      
+      if (weeks <= 0) {
+        showError('Target date must be in the future');
+        return null;
+      }
+      
+      dailyCalorieAdjustment = totalCaloriesNeeded / (weeks * 7);
+      if (isWeightLoss) {
+        targetDailyCalories = tdee - dailyCalorieAdjustment;
+      } else {
+        targetDailyCalories = tdee + dailyCalorieAdjustment;
+      }
+    } else {
+      weeks = parseInt(data.timeframe);
+      dailyCalorieAdjustment = totalCaloriesNeeded / (weeks * 7);
+      if (isWeightLoss) {
+        targetDailyCalories = tdee - dailyCalorieAdjustment;
+      } else {
+        targetDailyCalories = tdee + dailyCalorieAdjustment;
+      }
+    }
+
+    const result = {
+      weeks: weeks,
+      dailyCalorieAdjustment: dailyCalorieAdjustment,
+      targetDailyCalories: targetDailyCalories,
+      weeklyWeightChange: data.timeframe === '0' ? 
+        (dailyCalorieAdjustment * 7) / 3500 : 
+        Math.abs(data.weight - data.goalWeight) / weeks
+    };
+
+    console.log('Final timeframe result:', result); // Debug log
+
+    return result;
+  }
+
+  function displayResults(bmr, tdee, data, weightDifference, timelineResults, isWeightLoss) {
+    const resultDiv = document.getElementById('result');
+    
+    // Store data for goal calculator
+    originalCalculationData = {
+      bmr: bmr,
+      tdee: tdee,
+      data: data,
+      weightDifference: weightDifference,
+      isWeightLoss: isWeightLoss
+    };
+    
+    let html = `
+      <h3>Your Results</h3>
+      
+      <div class="result-item">
+        <strong>Basal Metabolic Rate (BMR):</strong> ${Math.round(bmr)} calories/day<br>
+        <small>This is what your body burns at rest</small>
+      </div>
+
+      <div class="result-item">
+        <strong>Total Daily Energy Expenditure (TDEE):</strong> ${Math.round(tdee)} calories/day<br>
+        <small>This includes your activity level</small>
+      </div>
+
+      <div class="result-item">
+        <strong>Weight Goal:</strong> ${isWeightLoss ? 'Lose' : 'Gain'} ${Math.abs(weightDifference).toFixed(1)} lbs<br>
+        <small>From ${data.weight} lbs to ${data.goalWeight} lbs</small>
+      </div>
+    `;
+
+    if (timelineResults && data.timeframe !== '0') {
+      html += `
+        <div class="result-item">
+          <strong>Timeline:</strong> ${Math.round(timelineResults.weeks)} weeks<br>
+          <strong>Target Daily Calories:</strong> ${Math.round(timelineResults.targetDailyCalories)} calories<br>
+          <strong>Weekly Rate:</strong> ${isWeightLoss ? 'Lose' : 'Gain'} ${timelineResults.weeklyWeightChange.toFixed(1)} lbs/week
+        </div>
+      `;
+
+      // Add warnings for unsafe rates
+      if (timelineResults.weeklyWeightChange > 2) {
+        html += `
+          <div class="warning">
+            ⚠️ <strong>Warning:</strong> This rate of weight change (${timelineResults.weeklyWeightChange.toFixed(1)} lbs/week) may be too aggressive. Consider extending your timeline for safer, more sustainable results.
+          </div>
+        `;
+      }
+
+      if (timelineResults.targetDailyCalories < bmr) {
+        html += `
+          <div class="warning">
+            ⚠️ <strong>Warning:</strong> Your target calories (${Math.round(timelineResults.targetDailyCalories)}) are below your BMR (${Math.round(bmr)}). This may slow your metabolism and make it harder to maintain results.
+          </div>
+        `;
+      }
+    } else if (data.timeframe === '0') {
+      html += `
+        <div class="result-item">
+          <strong>Safest Sustainable Approach:</strong><br>
+          <strong>Recommended Daily Calories:</strong> ${Math.round(timelineResults.targetDailyCalories)} calories<br>
+          <strong>Estimated Timeline:</strong> ${Math.round(timelineResults.weeks)} weeks<br>
+          <strong>Weekly Rate:</strong> ${isWeightLoss ? 'Lose' : 'Gain'} ${timelineResults.weeklyWeightChange.toFixed(1)} lbs/week
+        </div>
+      `;
+    }
+
+    // Add BMR warning for initial results
+    if (timelineResults && timelineResults.targetDailyCalories < bmr) {
+      html += `
+        <div class="warning">
+          ⚠️ <strong>Warning:</strong> Your target calories (${Math.round(timelineResults.targetDailyCalories)}) are below your BMR (${Math.round(bmr)}). This may slow your metabolism and make it harder to maintain results.
+        </div>
+      `;
+    }
+
+    html += `
+      <div class="result-item">
+        <small><strong>Note:</strong> These calculations are estimates. Individual results may vary. Consult with a healthcare provider before making significant dietary changes.</small>
+      </div>
+    `;
+
+    resultDiv.innerHTML = html;
+    resultDiv.style.display = 'block';
+    resultDiv.scrollIntoView({ behavior: 'smooth' });
+    
+    // Show goal calculator and populate default values
+    showGoalCalculator(timelineResults);
+  }
+
+  function showError(message) {
+    const resultDiv = document.getElementById('result');
+    resultDiv.innerHTML = `<div class="error"><strong>Error:</strong> ${message}</div>`;
+    resultDiv.style.display = 'block';
+    resultDiv.scrollIntoView({ behavior: 'smooth' });
+  }
+
+  function showGoalCalculator(timelineResults) {
+    const goalCalc = document.getElementById('goalCalculator');
+    const dailyCaloriesInput = document.getElementById('dailyCalories');
+    const exerciseCaloriesInput = document.getElementById('exerciseCalories');
+    
+    // Set default values based on original calculation
+    if (timelineResults) {
+      dailyCaloriesInput.value = Math.round(timelineResults.targetDailyCalories);
+      dailyCaloriesInput.placeholder = Math.round(timelineResults.targetDailyCalories);
+    }
+    
+    exerciseCaloriesInput.value = 0;
+    exerciseCaloriesInput.placeholder = "0";
+    
+    goalCalc.style.display = 'block';
+  }
+
+  function calculateNewGoalDate() {
+    if (!originalCalculationData) return;
+    
+    const dailyCalories = parseInt(document.getElementById('dailyCalories').value) || 0;
+    const exerciseCalories = parseInt(document.getElementById('exerciseCalories').value) || 0;
+    
+    if (dailyCalories <= 0) {
+      document.getElementById('goalResult').innerHTML = '<div style="color: #dc3545;">Please enter a valid daily calorie intake.</div>';
+      document.getElementById('goalResult').style.display = 'block';
+      return;
+    }
+    
+    const { bmr, tdee, data, weightDifference, isWeightLoss } = originalCalculationData;
+    
+    // Calculate net daily calories (intake - TDEE - exercise)
+    const netDailyCalories = dailyCalories - tdee - exerciseCalories;
+    
+    // Calculate daily calorie deficit/surplus
+    const dailyDeficit = isWeightLoss ? -netDailyCalories : netDailyCalories;
+    
+    if (dailyDeficit <= 0 && isWeightLoss) {
+      document.getElementById('goalResult').innerHTML = `
+        <div style="color: #dc3545;">
+          <strong>Cannot reach weight loss goal</strong><br>
+          With ${dailyCalories} calories intake and ${exerciseCalories} calories burned, you're not in a caloric deficit. 
+          You need to eat less or exercise more to lose weight.
+        </div>
+      `;
+      document.getElementById('goalResult').style.display = 'block';
+      return;
+    }
+    
+    if (dailyDeficit <= 0 && !isWeightLoss) {
+      document.getElementById('goalResult').innerHTML = `
+        <div style="color: #dc3545;">
+          <strong>Cannot reach weight gain goal</strong><br>
+          With ${dailyCalories} calories intake and ${exerciseCalories} calories burned, you're not in a caloric surplus. 
+          You need to eat more or exercise less to gain weight.
+        </div>
+      `;
+      document.getElementById('goalResult').style.display = 'block';
+      return;
+    }
+    
+    // Calculate timeline
+    const totalCaloriesNeeded = Math.abs(weightDifference) * 3500;
+    const daysToGoal = Math.ceil(totalCaloriesNeeded / dailyDeficit);
+    const weeksToGoal = daysToGoal / 7;
+    
+    // Calculate target date
+    const targetDate = new Date();
+    targetDate.setDate(targetDate.getDate() + daysToGoal);
+    
+    const weeklyRate = (Math.abs(weightDifference) / weeksToGoal);
+    
+    // Format the date
+    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+    const formattedDate = targetDate.toLocaleDateString('en-US', options);
+    
+    // Display results
+    let resultHtml = `
+      <div id="goalDateDisplay" style="font-size: 1.2rem; font-weight: 600; color: #ffa798; margin-bottom: 0.8rem;">
+        🎯 Projected Goal Date: ${formattedDate}
+      </div>
+      <div style="font-size: 0.95rem; color: #666; line-height: 1.5;">
+        <strong>Timeline:</strong> ${Math.round(weeksToGoal)} weeks (${daysToGoal} days)<br>
+        <strong>Weekly Rate:</strong> ${isWeightLoss ? 'Lose' : 'Gain'} ${weeklyRate.toFixed(1)} lbs/week<br>
+        <strong>Daily ${isWeightLoss ? 'Deficit' : 'Surplus'}:</strong> ${dailyDeficit.toFixed(1)} calories
+      </div>
+    `;
+    
+    // Add warnings
+    if (weeklyRate > 2) {
+      resultHtml += `
+        <div style="background-color: #fff3cd; border: 1px solid #ffc107; border-radius: 4px; padding: 0.5rem; margin-top: 0.8rem; font-size: 0.9rem; color: #856404;">
+          ⚠️ This rate (${weeklyRate.toFixed(1)} lbs/week) may be too aggressive for sustainable results.
+        </div>
+      `;
+    }
+    
+    if (dailyCalories < bmr) {
+      resultHtml += `
+        <div style="background-color: #fff3cd; border: 1px solid #ffc107; border-radius: 4px; padding: 0.5rem; margin-top: 0.8rem; font-size: 0.9rem; color: #856404;">
+          ⚠️ Your calorie intake (${dailyCalories}) is below your BMR (${Math.round(bmr)}). This may slow your metabolism.
+        </div>
+      `;
+    }
+    
+    document.getElementById('goalResult').innerHTML = resultHtml;
+    document.getElementById('goalResult').style.display = 'block';
+  }
+</script>
+</body>
+</html>
+
