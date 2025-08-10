@@ -160,6 +160,7 @@
 </style>
 </head>
 <body>
+  <div id="BMR-CalculatorContainer">
   <div class="calculator-container">
     <h2>BMR & Goal Weight Calculator</h2>
     <form id="bmrForm">
@@ -639,6 +640,23 @@
     document.getElementById('goalResult').innerHTML = resultHtml;
     document.getElementById('goalResult').style.display = 'block';
   }
+</script>
+    </div>
+<script>
+    function sendIframeHeight() {
+        const contentContainer = document.getElementById('BMR-CalculatorContainer');
+        if (contentContainer) {
+            const height = contentContainer.scrollHeight + 50; // extra buffer to avoid scrollbar
+            window.parent.postMessage({ type: 'setIframeHeight', height: height }, 'https://www.menohello.com');
+        }
+    }
+    window.addEventListener('DOMContentLoaded', sendIframeHeight);
+    window.addEventListener('load', sendIframeHeight);
+    const containerToObserve = document.getElementById('Q&AContainer'); 
+    if (containerToObserve) {
+        const resizeObserver = new ResizeObserver(sendIframeHeight);
+        resizeObserver.observe(containerToObserve);
+    }
 </script>
 </body>
 </html>
