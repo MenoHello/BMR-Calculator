@@ -641,21 +641,22 @@
     document.getElementById('goalResult').style.display = 'block';
   }
 </script>
-    </div>
+  </div>
 <script>
-    function sendIframeHeight() {
-        const contentContainer = document.getElementById('BMR-CalculatorContainer');
-        if (contentContainer) {
-            const height = contentContainer.scrollHeight + 50; // extra buffer to avoid scrollbar
+   function sendIframeHeight() {
+    // Measure the full document height, not just a container
+    const height = document.documentElement.scrollHeight + 20; 
             window.parent.postMessage({ type: 'setIframeHeight', height: height }, 'https://www.menohello.com');
         }
     }
     window.addEventListener('DOMContentLoaded', sendIframeHeight);
     window.addEventListener('load', sendIframeHeight);
-    const containerToObserve = document.getElementById('Q&AContainer'); 
+  window.addEventListener('resize', sendIframeHeight);
+    const containerToObserve = document.getElementById('BMR-CalculatorContainer'); 
     if (containerToObserve) {
         const resizeObserver = new ResizeObserver(sendIframeHeight);
         resizeObserver.observe(containerToObserve);
+      resizeObserver.observe(document.body);
     }
 </script>
 </body>
