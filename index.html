@@ -6,20 +6,35 @@
 <title>MenoHello BMR & Goal Weight Calculator</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Poppins&display=swap');
+  
+  /* Remove default margins and ensure no overflow */
+  * {
+    box-sizing: border-box;
+  }
+  
+  html, body {
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+    min-height: 100vh;
+  }
+  
   body {
     background-color: #ffe9e5;
     font-family: 'Poppins', sans-serif;
     color: #333;
-    margin: 2rem;
+    padding: 1rem;
   }
+  
   .calculator-container {
     max-width: 480px;
     background: white;
     padding: 2rem;
     border-radius: 16px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    margin: auto;
+    margin: 0 auto 2rem auto;
   }
+  
   h2 {
     color: #ffa798;
     margin-bottom: 1.5rem;
@@ -157,6 +172,28 @@
     border-radius: 8px;
     margin-top: 1rem;
   }
+  
+  /* Mobile responsive adjustments */
+  @media (max-width: 768px) {
+    body {
+      padding: 0.5rem;
+    }
+    
+    .calculator-container {
+      padding: 1.5rem;
+      margin: 0 auto 1rem auto;
+    }
+    
+    .height-inputs {
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    
+    .gender-options {
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+  }
 </style>
 </head>
 <body>
@@ -207,9 +244,10 @@
     </form>
 
     <div id="result" class="result" style="display:none;"></div>
+  </div>
     
     <!-- Interactive Goal Calculator -->
-    <div id="goalCalculator" class="calculator-container" style="display:none; margin-top: 2rem;">
+    <div id="goalCalculator" class="calculator-container" style="display:none;">
       <h2>Weight Goal Calculator</h2>
       <p style="color: #666; line-height: 1.5; margin-bottom: 1.5rem;">
         Want to see how changes to your diet and exercise could affect your weight goal? 
@@ -519,17 +557,19 @@
 
     resultDiv.innerHTML = html;
     resultDiv.style.display = 'block';
-    resultDiv.scrollIntoView({ behavior: 'smooth' });
     
     // Show goal calculator and populate default values
     showGoalCalculator(timelineResults);
+    
+    // Update height after results are shown
+    setTimeout(updateIframeHeight, 100);
   }
 
   function showError(message) {
     const resultDiv = document.getElementById('result');
     resultDiv.innerHTML = `<div class="error"><strong>Error:</strong> ${message}</div>`;
     resultDiv.style.display = 'block';
-    resultDiv.scrollIntoView({ behavior: 'smooth' });
+    setTimeout(updateIframeHeight, 100);
   }
 
   function showGoalCalculator(timelineResults) {
@@ -547,6 +587,9 @@
     exerciseCaloriesInput.placeholder = "0";
     
     goalCalc.style.display = 'block';
+    
+    // Update height after showing goal calculator
+    setTimeout(updateIframeHeight, 100);
   }
 
   function calculateNewGoalDate() {
@@ -558,6 +601,7 @@
     if (dailyCalories <= 0) {
       document.getElementById('goalResult').innerHTML = '<div style="color: #dc3545;">Please enter a valid daily calorie intake.</div>';
       document.getElementById('goalResult').style.display = 'block';
+      setTimeout(updateIframeHeight, 100);
       return;
     }
     
@@ -578,6 +622,7 @@
         </div>
       `;
       document.getElementById('goalResult').style.display = 'block';
+      setTimeout(updateIframeHeight, 100);
       return;
     }
     
@@ -590,6 +635,7 @@
         </div>
       `;
       document.getElementById('goalResult').style.display = 'block';
+      setTimeout(updateIframeHeight, 100);
       return;
     }
     
@@ -639,26 +685,89 @@
     
     document.getElementById('goalResult').innerHTML = resultHtml;
     document.getElementById('goalResult').style.display = 'block';
+    setTimeout(updateIframeHeight, 100);
   }
-</script>
-  </div>
-<script>
-   function sendIframeHeight() {
-    // Measure the full document height, not just a container
-    const height = document.documentElement.scrollHeight + 20; 
-            window.parent.postMessage({ type: 'setIframeHeight', height: height }, 'https://www.menohello.com');
+
+  // Improved iframe height management
+  function updateIframeHeight() {
+    try {
+      const body = document.body;
+      const html = document.documentElement;
+      
+      // Get the actual content height
+      const height = Math.max(
+        body.scrollHeight,
+        body.offsetHeight,
+        html.clientHeight,
+        html.scrollHeight,
+        html.offsetHeight
+      );
+      
+      // Add small buffer to prevent any clipping
+      const finalHeight = height + 30;
+      
+      // Send message to parent window
+      if (window.parent && window.parent !== window) {
+        window.parent.postMessage({ 
+          type: 'setIframeHeight', 
+          height: finalHeight 
+        }, '*');
+      }
+      
+      console.log('Updated iframe height to:', finalHeight);
+    } catch (error) {
+      console.error('Error updating iframe height:', error);
+    }
+  }
+
+  // Initialize height management
+  function initializeHeightManagement() {
+    // Initial height update
+    updateIframeHeight();
+    
+    // Update on DOM content changes
+    const observer = new MutationObserver(function(mutations) {
+      let shouldUpdate = false;
+      
+      mutations.forEach(function(mutation) {
+        if (mutation.type === 'childList' || 
+            mutation.type === 'attributes' || 
+            (mutation.type === 'characterData' && mutation.target.parentNode)) {
+          shouldUpdate = true;
         }
-    }
-    window.addEventListener('DOMContentLoaded', sendIframeHeight);
-    window.addEventListener('load', sendIframeHeight);
-  window.addEventListener('resize', sendIframeHeight);
-    const containerToObserve = document.getElementById('BMR-CalculatorContainer'); 
-    if (containerToObserve) {
-        const resizeObserver = new ResizeObserver(sendIframeHeight);
-        resizeObserver.observe(containerToObserve);
-      resizeObserver.observe(document.body);
-    }
+      });
+      
+      if (shouldUpdate) {
+        setTimeout(updateIframeHeight, 50);
+      }
+    });
+    
+    // Observe the entire document for changes
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['style', 'class'],
+      characterData: true
+    });
+    
+    // Update on window resize
+    window.addEventListener('resize', function() {
+      setTimeout(updateIframeHeight, 100);
+    });
+    
+    // Update when images load (if any)
+    window.addEventListener('load', function() {
+      setTimeout(updateIframeHeight, 200);
+    });
+  }
+
+  // Start height management when DOM is ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeHeightManagement);
+  } else {
+    initializeHeightManagement();
+  }
 </script>
 </body>
 </html>
-
