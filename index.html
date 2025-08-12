@@ -4,10 +4,8 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>MenoHello BMR & Goal Weight Calculator</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
 <style>
+  @import url('https://fonts.googleapis.com/css2?family=Poppins&display=swap');
   body {
     background-color: #ffe9e5;
     font-family: 'Poppins', sans-serif;
@@ -209,6 +207,7 @@
 
     <div id="result" class="result" style="display:none;"></div>
     
+    <!-- Interactive Goal Calculator -->
     <div id="goalCalculator" class="calculator-container" style="display:none; margin-top: 2rem;">
       <h2>Weight Goal Calculator</h2>
       <p style="color: #666; line-height: 1.5; margin-bottom: 1.5rem;">
@@ -236,17 +235,6 @@
   </div>
 
 <script>
-  // Function to send the new height to the parent window
-  function resizeIframe() {
-    if (window.parent) {
-      const height = document.body.scrollHeight;
-      window.parent.postMessage({
-        'height': height + 'px',
-        'iframeId': 'my-bmr-calculator-iframe' // Optional: a unique identifier for the iframe
-      }, '*');
-    }
-  }
-
   // Enhanced input styling
   document.querySelectorAll('input').forEach(el => {
     el.addEventListener('input', () => el.classList.add('used'));
@@ -261,15 +249,12 @@
       if (this.value !== 'custom') {
         dateInput.value = '';
       }
-      // Resize after this change
-      setTimeout(resizeIframe, 100);
     });
   });
 
   // Goal calculator button handler
   document.getElementById('calculateGoalDate').addEventListener('click', function() {
     calculateNewGoalDate();
-    setTimeout(resizeIframe, 100);
   });
 
   // Store original calculation data for goal calculator
@@ -284,8 +269,6 @@
     } catch (error) {
       showError('An error occurred during calculation. Please check your inputs and try again.');
     }
-    // Resize after the form is submitted
-    setTimeout(resizeIframe, 100);
   });
 
   function calculateResults() {
@@ -305,10 +288,7 @@
     console.log('Form data:', data); // Debug log
 
     // Validation
-    if (!validateInputs(data)) {
-      setTimeout(resizeIframe, 100);
-      return;
-    }
+    if (!validateInputs(data)) return;
 
     // Convert height to cm and weight to kg for calculations
     const totalInches = (data.heightFeet * 12) + data.heightInches;
@@ -346,10 +326,7 @@
 
     console.log('Timeline results:', timelineResults); // Debug log
 
-    if (!timelineResults) {
-      setTimeout(resizeIframe, 100);
-      return; // Exit if timeframe calculation failed
-    }
+    if (!timelineResults) return; // Exit if timeframe calculation failed
 
     // Display results
     displayResults(bmr, tdee, data, weightDifference, timelineResults, isWeightLoss);
@@ -662,10 +639,7 @@
     document.getElementById('goalResult').innerHTML = resultHtml;
     document.getElementById('goalResult').style.display = 'block';
   }
-
-  // Initial resize when the page loads
-  window.addEventListener('load', resizeIframe);
-  window.addEventListener('resize', resizeIframe);
 </script>
 </body>
 </html>
+
